@@ -1,19 +1,21 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 var slug = require("slug");
+const pagination = require('../Pagination/pagination')
 
 class UserController {
   index = async (req, res) => {
     try {
-      const users = await prisma.user.findMany();
+      const pageNumber = parseInt(req.params.pageNumber);
 
-      if (users.length === 0) {
-        return res
-          .status(404)
-          .json({ ok: false, message: "List of users is empty" });
-      }
+      const { totalCount, totalPages, pageSize, offset } =
+        pagination(pageNumber);
+      const users = await prisma.user.findMany({
+        skip: offset,
+        take: pageSize,
+      });
 
-      return res.json({ ok: true, users }); // Changed 'ok' value to true
+      return res.json({ users, totalCount, totalPages });
     } catch (error) {
       console.error(error);
       res.status(500).json({
@@ -34,8 +36,6 @@ class UserController {
         },
       });
       res.json(newUser);
-
-     
     } catch (error) {
       console.error("An error occurred:", error);
       res
@@ -74,7 +74,7 @@ class UserController {
     try {
       const { name, email, id } = req.body;
       const userId = parseInt(id);
-      console.log(req.body)
+      console.log(req.body);
       const updateUser = await prisma.user.update({
         where: {
           id: userId,
@@ -104,6 +104,107 @@ class UserController {
         },
       });
       res.json(updateUser);
+    } catch (error) {
+      console.error("An error occurred:", error);
+      res
+        .status(500)
+        .json({ error: "An error occurred while creating the item." });
+    } finally {
+      await prisma.$disconnect();
+    }
+  };
+
+  // search = async (req, res) => {
+  //   try {
+  //     const { field, query } = req.body;
+      
+  //     const listUsers = await prisma.user.findMany({
+  //       where: {
+  //         name: {
+  //           contains: query,
+  //         },
+  //       },
+  //     });
+  //     res.json(listUsers);
+      
+
+  //     // if (field === "name") {
+  //     //   const listUsers = await prisma.user.findMany({
+  //     //     where: {
+  //     //       name: {
+  //     //         contains: query,
+  //     //       },
+  //     //     },
+  //     //   });
+  //     //   res.json(listUsers);
+  //     // } else {
+  //     //   const listUsers = await prisma.user.findMany({
+  //     //     where: {
+  //     //       email: {
+  //     //         contains: query,
+  //     //       },
+  //     //     },
+  //     //   });
+  //     //   res.json(listUsers);
+  //     // }
+  //   } catch (error) {
+  //     console.error("An error occurred:", error);
+  //     res
+  //       .status(500)
+  //       .json({ error: "An error occurred while creating the item." });
+  //   } finally {
+  //     await prisma.$disconnect();
+  //   }
+  // };
+  search = async (req, res) => {
+    try {
+      const { field, query } = req.body;
+      console.log(query);
+      const listUsers = await prisma.user.findMany({
+        where: {
+          name: {
+            contains: query,
+          },
+        },
+      });
+      res.json(listUsers);
+      
+    } catch (error) {
+      console.error("An error occurred:", error);
+      res.status(500).json({ error: "An error occurred while searching." });
+    } finally {
+      await prisma.$disconnect();
+    }
+  };
+
+  sort = async (req, res) => {
+    try {
+      const { field, stt, pageNumber } = req.body;
+
+      const { totalCount, totalPages, pageSize, offset } =
+        pagination(pageNumber);
+
+      console.log(pageSize);
+
+      if (field === "id") {
+        const users = await prisma.user.findMany({
+          skip: offset,
+          take: pageSize,
+          orderBy: {
+            id: stt,
+          },
+        });
+        res.json(users);
+      } else {
+        const users = await prisma.user.findMany({
+          skip: offset,
+          take: pageSize,
+          orderBy: {
+            name: stt,
+          },
+        });
+        res.json(users);
+      }
     } catch (error) {
       console.error("An error occurred:", error);
       res
