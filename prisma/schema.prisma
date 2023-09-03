@@ -15,14 +15,42 @@ model User {
   name    String
   email   String   @unique
   profile Profile?
+  Post    Post?
 }
 
 model Profile {
-  userId     Int     @unique
-  user       User    @relation(fields: [userId], references: [id])
-  nickname   String?  
-  workplace  String? 
-  address    String? 
-  relation   String? 
-  createdAt  String? 
+  userId    Int       @id @unique
+  user      User      @relation(fields: [userId], references: [id])
+  fullname  String    @db.Text
+  nickname  String?
+  workplace String?
+  address   String?
+  relation  String?
+  createdAt DateTime?
+}
+
+model Mode {
+  modeId   Int    @id @default(autoincrement())
+  modeName String @db.VarChar(100)
+  Post     Post?
+}
+
+model Post {
+  postId     Int      @id @default(autoincrement())
+  desc       String?  @db.Text
+  imageUrl   String?  @db.VarChar(200)
+  createAt   DateTime
+  modeId     Int?      @unique
+  mode       Mode?     @relation(fields: [modeId], references: [modeId])
+  reactionId Int?      @unique
+  reaction   Reaction? @relation(fields: [reactionId], references: [reactionId])
+  userId     Int?      @unique
+  user       User?     @relation(fields: [userId], references: [id])
+}
+
+model Reaction {
+  reactionId    Int    @id @default(autoincrement())
+  nameReaction  String
+  imageReaction String
+  Post          Post?
 }

@@ -1,10 +1,10 @@
-
-
-
 class HomeController {
   /// LIST BLOG
   async CreatePost(req, res) {
-    res.json({ message: "File(s) uploaded successfully" });
+    const fileNames = req.files.map((file) => file.originalname);
+
+    // Do something with the file names, like sending a response
+    res.json({ fileNames });
   }
 }
 
