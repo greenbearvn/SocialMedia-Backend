@@ -12,6 +12,7 @@ CREATE TABLE `User` (
 CREATE TABLE `Profile` (
     `userId` INTEGER NOT NULL,
     `fullname` TEXT NOT NULL,
+    `avatar` VARCHAR(191) NULL,
     `nickname` VARCHAR(191) NULL,
     `workplace` VARCHAR(191) NULL,
     `address` VARCHAR(191) NULL,
@@ -33,16 +34,14 @@ CREATE TABLE `Mode` (
 -- CreateTable
 CREATE TABLE `Post` (
     `postId` INTEGER NOT NULL AUTO_INCREMENT,
-    `desc` TEXT NULL,
+    `desc` VARCHAR(191) NULL,
     `imageUrl` VARCHAR(200) NULL,
     `createAt` DATETIME(3) NOT NULL,
+    `status` BOOLEAN NOT NULL,
     `modeId` INTEGER NULL,
     `reactionId` INTEGER NULL,
-    `userId` INTEGER NULL,
+    `userId` INTEGER NOT NULL,
 
-    UNIQUE INDEX `Post_modeId_key`(`modeId`),
-    UNIQUE INDEX `Post_reactionId_key`(`reactionId`),
-    UNIQUE INDEX `Post_userId_key`(`userId`),
     PRIMARY KEY (`postId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -65,4 +64,4 @@ ALTER TABLE `Post` ADD CONSTRAINT `Post_modeId_fkey` FOREIGN KEY (`modeId`) REFE
 ALTER TABLE `Post` ADD CONSTRAINT `Post_reactionId_fkey` FOREIGN KEY (`reactionId`) REFERENCES `Reaction`(`reactionId`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Post` ADD CONSTRAINT `Post_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `Post` ADD CONSTRAINT `Post_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
